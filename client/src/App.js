@@ -1,24 +1,43 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 
 function App() {
+  // use states
+  const [nests, setNests] = useState([])
+  const [listening, setListening] = useState(false)
+
+  // use effect
+  useEffect( ()=> {
+    const events = new EventSource('http://localhost:4000/events');
+    events.onmessage = (event) => {
+      const parsedData = JSON.parse(event.data);
+
+      setNests((nests)=> nests.concat(parsedData))
+    };
+    setListening(true);
+  }, [listening, nests])
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <table className="stat-stable">
+        <thead>
+          <tr>
+            <th>Momma</th>
+            <th>Eggs</th>
+            <th>Tempreature</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            nests.map((nest, i) =>
+              <tr key={i}>
+                <td>{nest.momma}</td>
+                <td>{nest.eggs}</td>
+                <td>{nest.temperature}</td>
+              </tr>
+            )}
+        </tbody>
+      </table>
     </div>
   );
 }
